@@ -25,7 +25,10 @@
   "author": "Yonatan Kreiner",
   "license": "MIT",
   "dependencies": {
+    "babel-preset-react": "^6.24.1",
     "helmet": "^3.8.1",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
     "whatwg-fetch": "1.0.0"
   },
   "devDependencies": {

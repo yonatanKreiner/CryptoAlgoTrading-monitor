@@ -10,7 +10,7 @@ export default {
 	noInfo: false,
 	entry: {
 		vendor: path.resolve(__dirname, 'src/vendor'),
-		main: path.resolve(__dirname, 'src/index')
+		main: path.resolve(__dirname, 'src/index.jsx')
 	},
 	target: 'web',
 	output: {
@@ -54,12 +54,16 @@ export default {
 		// Eliminate duplicate packages
 		new webpack.optimize.DedupePlugin(),
 
+		new webpack.DefinePlugin({
+			'process.env.NODE_ENV': JSON.stringify('production')
+		}),
+
 		// Minify JS
 		new webpack.optimize.UglifyJsPlugin()
 	],
 	module: {
 		loaders: [
-			{test: /\.js$/, exclude: /node_modules/, loaders: ['babel']},
+			{test: /\.jsx?$/, exclude: /node_modules/, loaders: ['babel']},
 			{test: /\.css$/, loader: ExtractTextPlugin.extract('css?sourceMap')}
 		]
 	}
