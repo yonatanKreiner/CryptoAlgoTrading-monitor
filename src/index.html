@@ -7,11 +7,5 @@
 	</head>
 	<body>
 		<div id="app"></div>
-		<% if (htmlWebpackPlugin.options.trackJSToken) { %>
-			<!-- BEGIN TRACKJS -->
-			<script async type="text/javascript">window._trackJs = { token: '<%= htmlWebpackPlugin.options.trackJSToken %>' };</script>
-			<script async type="text/javascript" src="https://cdn.trackjs.com/releases/current/tracker.js"></script>
-			<!-- END TRACKJS -->
-		<% } %>
 	</body>
 </html>
