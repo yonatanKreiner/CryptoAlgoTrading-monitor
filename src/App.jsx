@@ -17,10 +17,10 @@ class App extends Component {
 				bit2cData:[],
 				bit2cBid:[],
         bitfinexcData: [],
-				transactionsBuyPoints:[],
+				transactionsBuyPoints:[ ],
 				transactionsSellPoints:[],
-				fromDate:new Date('2017-12-24T10:28:46.007Z'),
-				toDate : new Date('2017-12-24T10:36:46.007Z')
+        fromDate:new Date('2017-12-24T12:28:46.007'),
+				toDate : new Date('2017-12-24T12:36:46.007')  
       }
     }
   }
