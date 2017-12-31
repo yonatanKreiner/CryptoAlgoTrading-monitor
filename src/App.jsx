@@ -7,11 +7,14 @@ import {XYPlot,
   YAxis,
   VerticalGridLines,
   HorizontalGridLines,
-	LineMarkSeries, LineSeries} from 'react-vis';
+  LineMarkSeries, LineSeries} from 'react-vis';
+  
+const inverval = 60;
 
 class App extends Component {
   constructor(props){
     super(props);
+    this.addDates = this.addDates.bind(this);
     this.state = {
       data:{
 				bit2cData:[],
@@ -20,7 +23,7 @@ class App extends Component {
 				transactionsBuyPoints:[ ],
 				transactionsSellPoints:[],
         fromDate:new Date('2017-12-24T12:28:46.007'),
-				toDate : new Date('2017-12-24T12:36:46.007')  
+				toDate : new Date('2017-12-24T13:28:46.007')  
       }
     }
   }
@@ -55,7 +58,9 @@ class App extends Component {
           bitfinexcData:bitfinexcData,
 					transactionsBuyPoints:prevState.data.transactionsBuyPoints,
 					transactionsSellPoints:prevState.data.transactionsSellPoints,
-					bit2cBid:bit2cBid
+          bit2cBid:bit2cBid,
+          fromDate:prevState.data.fromDate,
+          toDate :prevState.data.toDate
         }
       }))
 
@@ -68,18 +73,41 @@ class App extends Component {
 			var sellTransactions = _.map(response.data, (transaction)=>{return transaction.sell} );
 			var transactionsBuyPoints = _.map(buyTransactions, this.toTransactionPoints);
 			var transactionsSellPoints = _.map(sellTransactions, this.toTransactionPoints);
-      
-      this.setState({
-        data:{
+      this.setState(prevState => ({
+        data: {
 					transactionsBuyPoints:transactionsBuyPoints,
-					transactionsSellPoints:transactionsSellPoints
+					transactionsSellPoints:transactionsSellPoints,
+          fromDate:prevState.data.fromDate,
+          toDate :prevState.data.toDate
         }
-      });
+      }))
     })
   }
 
   showTickerData(datapoint, event){
     alert(JSON.stringify(datapoint.transaction));
+  }
+
+  addDates(){
+    var newToDate = this.state.data.toDate;
+    newToDate.setMinutes(this.state.data.toDate.getMinutes() + inverval);
+
+    var newfromDate = this.state.data.fromDate;
+    newfromDate.setMinutes(this.state.data.fromDate.getMinutes() + inverval);
+
+    this.setState(prevState => ({
+      data: {
+        bit2cData:prevState.data.bit2cData,
+        bitfinexcData:prevState.data.bitfinexcData,
+        transactionsBuyPoints:prevState.data.transactionsBuyPoints,
+        transactionsSellPoints:prevState.data.transactionsSellPoints,
+        bit2cBid:prevState.data.bit2cBid,
+        fromDate:newfromDate,
+        toDate:newToDate
+      }
+    }))
+
+    this.componentWillMount();
   }
 
   render() {
@@ -92,6 +120,9 @@ class App extends Component {
         <p className="App-intro">
           Bit2c vs Bitterex
         </p>
+        <button onClick={this.addDates}>Pass Interval</button>
+        <input type="text" value={this.state.data.fromDate}  />
+        <input type="text" value={this.state.data.toDate} />
         <XYPlot xType="time" width={7000} height={1100} >
           <VerticalGridLines />
           <HorizontalGridLines />
