@@ -5,9 +5,7 @@ export default {
 	debug: true,
 	devtool: 'inline-source-map',
 	noInfo: false,
-	entry: [
-		path.resolve(__dirname, 'src/index.jsx')
-	],
+	entry: ['babel-polyfill', './src/index.jsx'],
 	target: 'web',
 	output: {
 		path: path.resolve(__dirname, 'src'),
