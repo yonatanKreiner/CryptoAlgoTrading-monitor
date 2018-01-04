@@ -44,15 +44,15 @@ class App extends Component {
   }
 
   toTransactionPoints(transaction) {
-    return {x:new Date(transaction.date).getTime(), y:transaction.price * 3.49, transaction:transaction};
+    return {x:new Date(transaction.date).getTime(), y:transaction.price * 3.5, transaction:transaction};
   }
 
   toNisPoint(ticker) {
-    return {x:new Date(ticker.date).getTime(), y:ticker.ask * 3.49};
+    return {x:new Date(ticker.date).getTime(), y:ticker.ask * 3.5};
 	}
 
 	toAverage(ticker) {
-    return {x:new Date(ticker.date).getTime(), y:ticker.ask * 3.49};
+    return {x:new Date(ticker.date).getTime(), y:ticker.ask * 3.5};
   }
 
   componentWillMount(){
@@ -66,7 +66,7 @@ class App extends Component {
 			var averagePoints = [];
 
 			for (var i = 0; i < response.data.bit2cTickers.length; i++) {
-				var average = response.data.bit2cTickers[i].bid / (response.data.bitfinexTickers[i].bid *  3.49);
+				var average = response.data.bit2cTickers[i].bid / (response.data.bitfinexTickers[i].bid *  3.5);
 				averagePoints.push({x:new Date(response.data.bit2cTickers[i].date).getTime(),y:average});
 			}
 
