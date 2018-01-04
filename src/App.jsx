@@ -7,7 +7,7 @@ import {XYPlot,
   YAxis,
   VerticalGridLines,
   HorizontalGridLines,
-  LineMarkSeries, LineSeries} from 'react-vis';
+  LineMarkSeries, LineSeries, WhiskerSeries} from 'react-vis';
   
 const inverval = 60;
 
@@ -40,7 +40,7 @@ class App extends Component {
 	}
 	
 	toAveragePoint(point) {
-    return {x:point.x, y:1.2};
+    return {x:point.x, y:1.2, yVariance: 1};
   }
 
   toTransactionPoints(transaction) {
@@ -179,11 +179,10 @@ class App extends Component {
           <HorizontalGridLines />
           <XAxis />
           <YAxis />
-					<LineMarkSeries data={this.state.data.averageBuyPoints} className="averageBuyPoints" style={{stroke: 'white'}}/>
-					<LineMarkSeries data={this.state.data.averageSellPoints}  className="transactionsSellPoints" style={{stroke: 'white'}}/>
 					<LineSeries className="average" data={this.state.data.averagePoints} style={{stroke: 'black'}}/> 
+					<WhiskerSeries className="whisker-series-example" data={this.state.data.averageBuyPoints} />
+					<WhiskerSeries className="whisker-series-example" data={this.state.data.averageSellPoints} />
       	</XYPlot>
-
 
       </div>
 
