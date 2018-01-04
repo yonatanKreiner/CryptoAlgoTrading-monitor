@@ -25,8 +25,8 @@ class App extends Component {
 				averagePoints:[],
 				averageBuyPoints:[],
 				averageSellPoints:[],
-        fromDate:new Date('2017-12-24T12:28:46.007'),
-				toDate : new Date('2017-12-24T13:28:46.007')  
+        fromDate:new Date('2017-12-24T09:55:00.007'),
+				toDate : new Date('2017-12-24T11:00:00.007')  
       }
     }
   }
@@ -66,7 +66,7 @@ class App extends Component {
 			var averagePoints = [];
 
 			for (var i = 0; i < response.data.bit2cTickers.length; i++) {
-				var average = response.data.bit2cTickers[i].ask / (response.data.bitfinexTickers[i].ask *  3.49);
+				var average = response.data.bit2cTickers[i].bid / (response.data.bitfinexTickers[i].bid *  3.49);
 				averagePoints.push({x:new Date(response.data.bit2cTickers[i].date).getTime(),y:average});
 			}
 
