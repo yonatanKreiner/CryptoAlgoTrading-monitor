@@ -20,13 +20,15 @@ class App extends Component {
 				bit2cData:[],
 				bit2cBid:[],
         bitfinexcData: [],
-				transactionsBuyPoints:[ ],
+				transactionsBuyPoints:[],
 				transactionsSellPoints:[],
+				bitfinexcBuyPoints:[],
+				bitfinexcSellPoints:[],
 				averagePoints:[],
 				averageBuyPoints:[],
 				averageSellPoints:[],
-        fromDate:new Date('2017-12-24T09:55:00.007'),
-				toDate : new Date('2017-12-24T11:00:00.007')  
+        fromDate:new Date('2017-12-24T08:00:00.007'),
+				toDate : new Date('2017-12-25T03:30:00.007')  
       }
     }
   }
@@ -44,7 +46,14 @@ class App extends Component {
   }
 
   toTransactionPoints(transaction) {
-    return {x:new Date(transaction.date).getTime(), y:transaction.price * 3.5, transaction:transaction};
+		transaction.bid = transaction.bid * 3.5;
+		transaction.ask = transaction.ask * 3.5;
+
+    return {
+			x:new Date(transaction.date).getTime(),
+			y:transaction.price * 3.5,
+			transaction: transaction
+		};
   }
 
   toNisPoint(ticker) {
@@ -63,11 +72,48 @@ class App extends Component {
 			var bit2cData = _.map(bit2cTickers, this.toPoint);
 			var bit2cBid = _.map(bit2cTickers, this.toPointBid);
 			var bitfinexcData = _.map(bitfinexTickers, this.toNisPoint);
+			var bitfinex = _.map(bitfinexTickers, this.toNisPoint);
+			var bitfinexcBuyPoints = [];
+			var bitfinexcSellPoints = [];
 			var averagePoints = [];
 
-			for (var i = 0; i < response.data.bit2cTickers.length; i++) {
+			for (let i = 0; i < response.data.bit2cTickers.length; i++) {
 				var average = response.data.bit2cTickers[i].bid / (response.data.bitfinexTickers[i].bid *  3.5);
 				averagePoints.push({x:new Date(response.data.bit2cTickers[i].date).getTime(),y:average});
+			}
+
+			for (let i = 0; i < this.state.data.transactionsBuyPoints.length; i++) {
+				let buyX = this.state.data.transactionsBuyPoints[i].x;
+				let transaction = this.state.data.transactionsBuyPoints[i].transaction;
+				let buyPoint = _.find(bitfinexcData, function(o) { return o.x === buyX; });
+				let newTransacrion = {
+					price:transaction.price,
+					bid:buyPoint.y,
+					ask:buyPoint.y,
+					volume:transaction.volume,
+					date:transaction.date,
+					ratio:transaction.ratio
+				}
+
+				buyPoint["transaction"] = newTransacrion;
+				bitfinexcBuyPoints.push(buyPoint);
+			}
+
+			for (let i = 0; i < this.state.data.transactionsSellPoints.length; i++) {
+				let buyX = this.state.data.transactionsSellPoints[i].x;
+				let transaction = this.state.data.transactionsBuyPoints[i].transaction;
+				let buyPoint = _.find(bitfinexcData, function(o) { return o.x === buyX; });
+				let newTransacrion = {
+					price:transaction.price,
+					bid:buyPoint.y * 3.5,
+					ask:buyPoint.y * 3.5,
+					volume:transaction.volume,
+					date:transaction.date,
+					ratio:transaction.ratio
+				}
+
+				buyPoint["transaction"] = newTransacrion;
+				bitfinexcSellPoints.push(buyPoint);
 			}
 
 			var averageData = _.map(response.data.bit2cTickers, this.toNisPoint);
@@ -78,6 +124,8 @@ class App extends Component {
           bitfinexcData:bitfinexcData,
 					transactionsBuyPoints:prevState.data.transactionsBuyPoints,
 					transactionsSellPoints:prevState.data.transactionsSellPoints,
+					bitfinexcBuyPoints:bitfinexcBuyPoints,
+					bitfinexcSellPoints:bitfinexcSellPoints,
 					bit2cBid:bit2cBid,
 					averagePoints:averagePoints,
 					averageBuyPoints: prevState.data.averageBuyPoints,
@@ -128,7 +176,9 @@ class App extends Component {
         bit2cData:prevState.data.bit2cData,
         bitfinexcData:prevState.data.bitfinexcData,
         transactionsBuyPoints:prevState.data.transactionsBuyPoints,
-        transactionsSellPoints:prevState.data.transactionsSellPoints,
+				transactionsSellPoints:prevState.data.transactionsSellPoints,
+				bitfinexcSellPoints:prevState.data.bitfinexcSellPoints,
+				bitfinexcBuyPoints:prevState.data.bitfinexcBuyPoints,
 				bit2cBid:prevState.data.bit2cBid,
 				averagePoints:prevState.averagePoints,
         fromDate:newfromDate,
@@ -155,10 +205,12 @@ class App extends Component {
         <XYPlot xType="time" width={7000} height={1100} >
           <VerticalGridLines />
           <HorizontalGridLines />
-          <XAxis />
+          <XAxis />	
           <YAxis />
-          <LineMarkSeries data={this.state.data.transactionsBuyPoints} onValueClick={this.showTickerData} className="transactionsBuyPoints" style={{stroke: 'white'}}/>
-					<LineMarkSeries data={this.state.data.transactionsSellPoints} onValueClick={this.showTickerData} className="transactionsSellPoints" style={{stroke: 'white'}}/>
+          <LineMarkSeries data={this.state.data.transactionsBuyPoints} onValueClick={this.showTickerData} className="transactionsBuyPoints"  style={{stroke:"gray",size:20}}/>
+					<LineMarkSeries data={this.state.data.transactionsSellPoints} onValueClick={this.showTickerData} className="transactionsSellPoints"  style={{stroke:"black",size:20}}/>
+					<LineMarkSeries data={this.state.data.bitfinexcSellPoints} onValueClick={this.showTickerData} className="bitfinexcSellPoints"  style={{stroke:"black",size:20}}/>
+					<LineMarkSeries data={this.state.data.bitfinexcBuyPoints} onValueClick={this.showTickerData} className="bitfinexcBuyPoints"  style={{stroke:"black",size:20}}/>
 					<LineSeries className="bitfinexLine" data={this.state.data.bitfinexcData} style={{stroke: 'yellow'}}/> 
           <LineSeries className="bit2cLine" data={this.state.data.bit2cData} style={{stroke: 'blue'}}/> 
 					<LineSeries className="bit2cLineBid" data={this.state.data.bit2cBid} style={{stroke: 'red'}}/> 
