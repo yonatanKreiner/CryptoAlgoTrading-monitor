@@ -7,9 +7,9 @@ import {XYPlot,
   YAxis,
   VerticalGridLines,
   HorizontalGridLines,
-  LineMarkSeries, LineSeries, WhiskerSeries} from 'react-vis';
+  LineMarkSeries, LineSeries, WhiskerSeries,MarkSeries} from 'react-vis';
   
-const inverval = 60;
+const inverval = 12;
 
 class App extends Component {
   constructor(props){
@@ -27,8 +27,8 @@ class App extends Component {
 				averagePoints:[],
 				averageBuyPoints:[],
 				averageSellPoints:[],
-        fromDate:new Date('2017-12-24T08:00:00.007'),
-				toDate : new Date('2017-12-25T03:30:00.007')  
+        fromDate:new Date('2017-12-24T12:00:00.000'),
+				toDate : new Date('2017-12-25T00:00:00.000')  
       }
     }
   }
@@ -52,6 +52,7 @@ class App extends Component {
     return {
 			x:new Date(transaction.date).getTime(),
 			y:transaction.price * 3.5,
+			size :"30",
 			transaction: transaction
 		};
   }
@@ -166,10 +167,10 @@ class App extends Component {
 
   addDates(){
     var newToDate = this.state.data.toDate;
-    newToDate.setMinutes(this.state.data.toDate.getMinutes() + inverval);
+    newToDate.setHours(this.state.data.toDate.getHours() + inverval);
 
     var newfromDate = this.state.data.fromDate;
-    newfromDate.setMinutes(this.state.data.fromDate.getMinutes() + inverval);
+    newfromDate.setHours(this.state.data.fromDate.getHours() + inverval);
 
     this.setState(prevState => ({
       data: {
@@ -207,10 +208,10 @@ class App extends Component {
           <HorizontalGridLines />
           <XAxis />	
           <YAxis />
-          <LineMarkSeries data={this.state.data.transactionsBuyPoints} onValueClick={this.showTickerData} className="transactionsBuyPoints"  style={{stroke:"gray",size:20}}/>
-					<LineMarkSeries data={this.state.data.transactionsSellPoints} onValueClick={this.showTickerData} className="transactionsSellPoints"  style={{stroke:"black",size:20}}/>
-					<LineMarkSeries data={this.state.data.bitfinexcSellPoints} onValueClick={this.showTickerData} className="bitfinexcSellPoints"  style={{stroke:"black",size:20}}/>
-					<LineMarkSeries data={this.state.data.bitfinexcBuyPoints} onValueClick={this.showTickerData} className="bitfinexcBuyPoints"  style={{stroke:"black",size:20}}/>
+          <LineMarkSeries data={this.state.data.transactionsBuyPoints} onValueClick={this.showTickerData} className="transactionsBuyPoints"/>
+					<LineMarkSeries data={this.state.data.transactionsSellPoints} onValueClick={this.showTickerData} className="transactionsSellPoints"/>
+					<LineMarkSeries data={this.state.data.bitfinexcSellPoints} onValueClick={this.showTickerData} className="bitfinexcSellPoints"/>
+					<LineMarkSeries data={this.state.data.bitfinexcBuyPoints} onValueClick={this.showTickerData} className="bitfinexcBuyPoints" />
 					<LineSeries className="bitfinexLine" data={this.state.data.bitfinexcData} style={{stroke: 'yellow'}}/> 
           <LineSeries className="bit2cLine" data={this.state.data.bit2cData} style={{stroke: 'blue'}}/> 
 					<LineSeries className="bit2cLineBid" data={this.state.data.bit2cBid} style={{stroke: 'red'}}/> 
