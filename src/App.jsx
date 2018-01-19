@@ -14,7 +14,8 @@ const inverval = 12;
 class App extends Component {
   constructor(props){
     super(props);
-    this.addDates = this.addDates.bind(this);
+		this.addDates = this.addDates.bind(this);
+		this.changeMode = this.changeMode.bind(this);
     this.state = {
       data:{
 				bit2cData:[],
@@ -27,11 +28,34 @@ class App extends Component {
 				averagePoints:[],
 				averageBuyPoints:[],
 				averageSellPoints:[],
-        fromDate:new Date('2017-12-24T12:00:00.000'),
-				toDate : new Date('2017-12-25T00:00:00.000')  
+        fromDate:new Date('2018-01-18T12:00:00.000'),
+				toDate : new Date('2018-01-19T00:00:00.000'),
+				mode:false
       }
     }
   }
+
+	changeMode() {
+     this.setState(prevState => ({
+        data: {
+          bit2cData:prevState.data.bit2cData,
+          bitfinexcData:prevState.data.bitfinexcData,
+					transactionsBuyPoints:prevState.data.transactionsBuyPoints,
+					transactionsSellPoints:prevState.data.transactionsSellPoints,
+					bitfinexcBuyPoints:prevState.data.bitfinexcBuyPoints,
+					bitfinexcSellPoints:prevState.data.bitfinexcSellPoints,
+					bit2cBid:prevState.data.bit2cBid,
+					averagePoints:prevState.data.averagePoints,
+					averageBuyPoints: prevState.data.averageBuyPoints,
+					averageSellPoints:prevState.data.averageSellPoints,
+          fromDate:prevState.data.fromDate,
+					toDate :prevState.data.toDate,
+					mode:!prevState.data.mode
+        }
+			}))
+			
+			this.componentWillMount();
+	}
 
   toPoint(ticker) {
     return {x:new Date(ticker.date).getTime(), y:ticker.ask};
@@ -43,7 +67,16 @@ class App extends Component {
 	
 	toAveragePoint(point) {
     return {x:point.x, y:1.2, yVariance: 1};
-  }
+	}
+	
+	toOnlineTransactionPoints(transaction) {
+		return {
+			x:new Date(transaction.date).getTime(),
+			y:transaction.rate * 3.5,
+			size :"30",
+			transaction: transaction
+		};
+	}
 
   toTransactionPoints(transaction) {
 		transaction.bid = transaction.bid * 3.5;
@@ -63,9 +96,22 @@ class App extends Component {
 
 	toAverage(ticker) {
     return {x:new Date(ticker.date).getTime(), y:ticker.ask * 3.5};
+	}
+	
+	toOnlinePoint(ticker) {
+    return {x:new Date(ticker.timestamp).getTime(), y:ticker.rate * 3.5};
   }
 
   componentWillMount(){
+		let transactionsUrl = "";
+
+		if (this.state.data.mode){
+			transactionsUrl = "http://localhost:5000/onlineTransactions";
+		} else {
+			transactionsUrl = "http://localhost:5000/offlineTransactions";
+		}
+
+
     axios.get('http://localhost:5000/tickers?fromDate='+ this.state.data.fromDate + '&toDate=' + this.state.data.toDate)
     .then(response => {
       var bit2cTickers = response.data.bit2cTickers;
@@ -132,15 +178,18 @@ class App extends Component {
 					averageBuyPoints: prevState.data.averageBuyPoints,
 					averageSellPoints:prevState.data.averageSellPoints,
           fromDate:prevState.data.fromDate,
-          toDate :prevState.data.toDate
+					toDate :prevState.data.toDate,
+					mode:prevState.data.mode
         }
       }))
 
       console.log(this.state.data);
-    })
-
-    axios.get('http://localhost:5000/transactions?fromDate='+ this.state.data.fromDate + '&toDate=' + this.state.data.toDate)
+		})
+		
+    axios.get(transactionsUrl + '?fromDate='+ this.state.data.fromDate + '&toDate=' + this.state.data.toDate)
     .then(response => {
+
+			if (!this.state.data.mode){
 			var buyTransactions = _.map(response.data, (transaction)=>{return transaction.buy} );
 			var sellTransactions = _.map(response.data, (transaction)=>{return transaction.sell} );
 			var transactionsBuyPoints = _.map(buyTransactions, this.toTransactionPoints);
@@ -155,9 +204,30 @@ class App extends Component {
 					fromDate:prevState.data.fromDate,
 					averageBuyPoints:averageBuyPoints,
 					averageSellPoints:averageSellPoints,
-          toDate :prevState.data.toDate
+					toDate :prevState.data.toDate,
+					mode :prevState.data.mode
         }
       }))
+			} else {
+				var buyTransactions = _.find(response.data, { 'method': 'buy'});
+				var sellTransactions = _.find(response.data, { 'method': 'sell'});
+				var transactionsBuyPoints = _.map(buyTransactions, this.toOnlinePoint);
+				var transactionsSellPoints = _.map(sellTransactions, this.toOnlinePoint);
+				var averageBuyPoints = _.map(transactionsBuyPoints, this.toAveragePoint);
+				var averageSellPoints = _.map(transactionsSellPoints, this.toAveragePoint);
+	
+				this.setState(prevState => ({
+					data: {
+						transactionsBuyPoints:transactionsBuyPoints,
+						transactionsSellPoints:transactionsSellPoints,
+						fromDate:prevState.data.fromDate,
+						averageBuyPoints:averageBuyPoints,
+						averageSellPoints:averageSellPoints,
+						toDate :prevState.data.toDate,
+						mode :prevState.data.mode
+					}
+				}))
+			}
     })
   }
 
@@ -183,7 +253,8 @@ class App extends Component {
 				bit2cBid:prevState.data.bit2cBid,
 				averagePoints:prevState.averagePoints,
         fromDate:newfromDate,
-        toDate:newToDate
+				toDate:newToDate,
+				mode:prevState.data.mode
       }
     }))
 
@@ -191,6 +262,15 @@ class App extends Component {
   }
 
   render() {
+		let modeString = "";
+
+		if (this.state.data.mode){
+			modeString = "online";
+		} else{
+			modeString = "offline";
+		}
+
+
     return (
       <div className="App">
         <header className="App-header">
@@ -200,6 +280,8 @@ class App extends Component {
         <p className="App-intro">
           Bit2c vs Bitterex
         </p>
+				<button onClick={this.changeMode}>Change</button>
+				<span>{modeString}</span>
         <button onClick={this.addDates}>Pass Interval</button>
         <input type="text" value={this.state.data.fromDate}  />
         <input type="text" value={this.state.data.toDate} />
