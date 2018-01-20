@@ -10,6 +10,7 @@ import {XYPlot,
   LineMarkSeries, LineSeries, WhiskerSeries,MarkSeries} from 'react-vis';
   
 const inverval = 12;
+var fiatPrice = 3.5;
 
 class App extends Component {
   constructor(props){
@@ -28,8 +29,8 @@ class App extends Component {
 				averagePoints:[],
 				averageBuyPoints:[],
 				averageSellPoints:[],
-        fromDate:new Date('2018-01-18T12:00:00.000'),
-				toDate : new Date('2018-01-19T00:00:00.000'),
+        fromDate:new Date('2017-12-24T12:29:46.007'),
+				toDate : new Date('2017-12-24T20:29:46.007'),
 				mode:false
       }
     }
@@ -54,7 +55,7 @@ class App extends Component {
         }
 			}))
 			
-			this.componentWillMount();
+			this.componentDidMount();
 	}
 
   toPoint(ticker) {
@@ -72,37 +73,43 @@ class App extends Component {
 	toOnlineTransactionPoints(transaction) {
 		return {
 			x:new Date(transaction.date).getTime(),
-			y:transaction.rate * 3.5,
+			y:transaction.rate * fiatPrice,
 			size :"30",
 			transaction: transaction
 		};
 	}
 
   toTransactionPoints(transaction) {
-		transaction.bid = transaction.bid * 3.5;
-		transaction.ask = transaction.ask * 3.5;
+		transaction.bid = transaction.bid * fiatPrice;
+		transaction.ask = transaction.ask * fiatPrice;
 
     return {
 			x:new Date(transaction.date).getTime(),
-			y:transaction.price * 3.5,
+			y:transaction.price * fiatPrice,
 			size :"30",
 			transaction: transaction
 		};
   }
 
   toNisPoint(ticker) {
-    return {x:new Date(ticker.date).getTime(), y:ticker.ask * 3.5};
+    return {x:new Date(ticker.date).getTime(), y:ticker.ask * fiatPrice};
 	}
 
 	toAverage(ticker) {
-    return {x:new Date(ticker.date).getTime(), y:ticker.ask * 3.5};
+    return {x:new Date(ticker.date).getTime(), y:ticker.ask * fiatPrice};
 	}
 	
 	toOnlinePoint(ticker) {
-    return {x:new Date(ticker.timestamp).getTime(), y:ticker.rate * 3.5};
-  }
+    return {x:new Date(ticker.timestamp).getTime(), y:ticker.rate * fiatPrice};
+	}
+	componentWillMount(){
+		axios.get('https://api.fixer.io/latest?base=USD&symbols=ILS').then(response => {
+			fiatPrice = parseFloat(response.data.rates.ILS);
+		});
 
-  componentWillMount(){
+	}
+
+  componentDidMount(){
 		let transactionsUrl = "";
 
 		if (this.state.data.mode){
@@ -125,7 +132,7 @@ class App extends Component {
 			var averagePoints = [];
 
 			for (let i = 0; i < response.data.bit2cTickers.length; i++) {
-				var average = response.data.bit2cTickers[i].bid / (response.data.bitfinexTickers[i].bid *  3.5);
+				var average = response.data.bit2cTickers[i].bid / (response.data.bitfinexTickers[i].bid *  fiatPrice);
 				averagePoints.push({x:new Date(response.data.bit2cTickers[i].date).getTime(),y:average});
 			}
 
@@ -152,8 +159,8 @@ class App extends Component {
 				let buyPoint = _.find(bitfinexcData, function(o) { return o.x === buyX; });
 				let newTransacrion = {
 					price:transaction.price,
-					bid:buyPoint.y * 3.5,
-					ask:buyPoint.y * 3.5,
+					bid:buyPoint.y * fiatPrice,
+					ask:buyPoint.y * fiatPrice,
 					volume:transaction.volume,
 					date:transaction.date,
 					ratio:transaction.ratio
@@ -258,7 +265,7 @@ class App extends Component {
       }
     }))
 
-    this.componentWillMount();
+    this.componentDidMount();
   }
 
   render() {
